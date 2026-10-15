@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Busy Times</title>
+<meta name="description" content="Typical busyness at Dunn Brothers Coffee, New Richmond WI (offline estimate).">
+<meta name="theme-color" content="#4E342E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Busy Times">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main id="main">
+  <header>
+    <h1 id="name"></h1>
+    <p class="small" id="meta"></p>
+    <p class="small">Hours: Mon–Fri 5:30 AM–5 PM · Sat–Sun 6:30 AM–5 PM</p>
+  </header>
+
+  <section class="card" id="now">
+    <h2 id="nowTitle">Right now</h2>
+    <div class="nowRow">
+      <svg id="gauge" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true"></svg>
+      <div>
+        <div class="big" id="nowVal"></div>
+        <div id="nowLabel"></div>
+        <div class="tiny" id="nowConf"></div>
+        <div class="tiny" id="nowNotes"></div>
+      </div>
+    </div>
+    <div class="delivery small" id="nowDel"></div>
+    <div class="tiny">Typical level, not live data. 10-minute values are interpolated estimates.</div>
+  </section>
+
+  <section>
+    <div class="dateRow">
+      <button id="prev" aria-label="Previous day">◀</button>
+      <input type="date" id="date" aria-label="Pick a date">
+      <button id="next" aria-label="Next day">▶</button>
+      <button id="today">Today</button>
+    </div>
+    <ul class="factors tiny" id="factors"></ul>
+    <h2 id="chartTitle"></h2>
+    <div class="chartWrap" id="chartWrap"><svg id="chart"></svg></div>
+    <div class="legend tiny"><span class="sw-store">■ In-store (est.)</span> <span class="delivery">— Delivery orders (est., separate)</span> <span>Dimmed = low confidence</span></div>
+    <p id="best"></p>
+    <p id="peak"></p>
+  </section>
+
+  <section class="card">
+    <h2 class="delivery">Delivery orders (estimate)</h2>
+    <p class="small" id="delFacts"></p>
+    <p class="tiny">The curve is a category pattern from DoorDash's public coffee-order stats (9 AM peak, Friday busiest). It does not show this store's actual orders. Real order counts are only available to the owner in the DoorDash Merchant Portal. This metric is never added to in-store busyness.</p>
+  </section>
+
+  <section>
+    <h2>By month (seasonal multiplier — ESTIMATE)</h2>
+    <div id="months"></div>
+  </section>
+
+  <button class="wide" id="openSources">Data sources &amp; how this is estimated</button>
+</main>
+
+<section id="sources" hidden>
+  <button id="back">← Back</button>
+  <h1>How this is estimated</h1>
+  <div class="small method">
+    <h3>Sourced</h3>
+    <ul>
+      <li>Business identity: Dunn Brothers Coffee is Suite 100 (AT&amp;T and Jimmy John's, Ste 300, share the street address). Hours: Mon–Fri 5:30–5, Sat–Sun 6:30–5.</li>
+      <li>Hourly popular-times profile for all 7 days, from a page mirroring Google's relative busyness scale (100 = the busiest it usually gets). Collected 2026-10-14. No second mirror with hourly values was found, and no live ("now") data or sub-hourly data is publicly available.</li>
+      <li>Typical visit is about 1 hour (Wanderlog). Reviews mention long waits at busy times, and a 2025 review says weekday mornings are staffed by 1–2 baristas.</li>
+      <li>2026-27 New Richmond school times: MS/HS 8:00–3:10, with drop-off from 7:30. Elementary 8:25–3:25, with drop-off from 7:55. Breaks come from the district calendar.</li>
+    </ul>
+    <h3>Interpolated / estimated</h3>
+    <ul>
+      <li>10-minute values: each sourced hourly value is placed at the middle of its hour (e.g. 9:30) and joined with a monotone cubic curve (Fritsch–Carlson), so the curve never overshoots the data. Each slot takes the value at its center. These are estimates.</li>
+      <li>Opening and closing: slots before opening (e.g. before 5:30) and from 5:00 PM on are 0. The 5 AM value is held flat for 5:30–6:00.</li>
+      <li>School-day bumps of +3 or +4 points at 7:30–8:00, 8:00–8:45 and 3:10–3:40 on approximate school days (Sep 1, 2026–Jun 3, 2027 weekdays, minus breaks). The times are sourced; the size of each bump is an estimate. Caution: the popular-times data may predate the 2026-27 schedule change. Dates outside 2026-27 are treated as non-school days.</li>
+      <li>Monthly multipliers and holiday/event factors (see the main page).</li>
+      <li>Confidence: MEDIUM means interpolated from sourced hours. LOW means within 30 min of open/close, an estimated adjustment applies, or a holiday/event day. The app never shows HIGH for a 10-minute slot.</li>
+      <li>Formula: in-store = interpolated sourced curve × monthly estimate × holiday estimate + school bump, clamped to 1–100 while open.</li>
+    </ul>
+    <h3>Delivery orders (separate metric)</h3>
+    <ul>
+      <li>The listing facts are sourced. The curve's shape follows DoorDash's public stats; the individual hourly numbers and the other days' ratios are estimates.</li>
+      <li>Real order counts are private; only the owner can see them in the DoorDash Merchant Portal.</li>
+      <li>Not live: the app works fully offline and makes no network requests after install.</li>
+    </ul>
+  </div>
+  <h2>Sources</h2>
+  <div id="sourceList"></div>
+</section>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
